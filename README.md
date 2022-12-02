@@ -3,7 +3,7 @@
 Repository containing a subforlder for each day of AoC 2022. Tried to realise each new challenge with a different programming language.
 
 - [Day 1](./1/):   **Python**
-- [Day 2](./2/):   ?
+- [Day 2](./2/):   **Ruby**
 - [Day 3](./3/):   ?
 - [Day 4](./4/):   ?
 - [Day 5](./5/):   ?
