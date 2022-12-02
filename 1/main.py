@@ -27,4 +27,5 @@ if __name__ == '__main__':
         help()
 
     elves: list[int] = read_file(argv[1])
+    print(max(elves))
     print(sum(sorted(elves, reverse=True)[0:3]))
