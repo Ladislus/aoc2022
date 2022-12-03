@@ -4,7 +4,7 @@ Repository containing a subforlder for each day of AoC 2022. Tried to realise ea
 
 - [Day 1](./1/):   **Python**
 - [Day 2](./2/):   **Ruby**
-- [Day 3](./3/):   ?
+- [Day 3](./3/):   **Zig**
 - [Day 4](./4/):   ?
 - [Day 5](./5/):   ?
 - [Day 6](./6/):   ?
