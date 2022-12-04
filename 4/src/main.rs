@@ -88,10 +88,7 @@ fn input_v2() {
                 let right_bot: u32 = right_split[0].parse::<u32>().unwrap();
                 let right_top: u32 = right_split[1].parse::<u32>().unwrap();
 
-                let left_set: HashSet<u32> = (left_bot..left_top + 1).collect();
-                let right_set: HashSet<u32> = (right_bot..right_top + 1).collect();
-
-                if !left_set.is_disjoint(&right_set) { score += 1; }
+                if !((left_bot..left_top + 1).collect::<HashSet<u32>>()).is_disjoint(&(right_bot..right_top + 1).collect::<HashSet<u32>>()) { score += 1; }
             } else {
                 eprintln!("Error: \"Error while reading lines\"");
                 exit(1);
