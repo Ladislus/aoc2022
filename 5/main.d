@@ -1,13 +1,11 @@
-import std.stdio: writeln, write, File, stderr;
+import std.stdio: writeln, File, stderr;
 import core.stdc.stdlib: exit;
 import std.exception: ErrnoException;
 import std.container: DList, Array;
-import std.ascii: newline, isWhite;
+import std.ascii: isWhite;
 import std.string: strip, isNumeric;
-import std.algorithm.searching: endsWith;
 import std.array: split, array;
 import std.range: stride, walkLength;
-import std.range.primitives: popFront;
 import std.regex: regex, matchFirst;
 import std.conv: to;
 
@@ -125,14 +123,19 @@ void input_v2(string filepath) {
 			const auto from = (match["from"].to!int()) - 1;
 			const auto to = (match["to"].to!int()) - 1;
 
+			dchar[] to_append;
+
 			foreach (i; 0 .. count) {
 				assert(from < stacks.length && to < stacks.length && from != to);
 				if (walkLength(stacks[from][]) == 0) { writeln("Empty stack, breaking"); break; }
 
 				auto popped = stacks[from].back;
 				stacks[from].removeBack();
-				stacks[to].insertBack(popped);
+
+				to_append ~= popped;
 			}
+
+			foreach_reverse (elem; to_append) stacks[to].insertBack(elem);
 		}
 
 		file.close();
