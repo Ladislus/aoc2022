@@ -7,7 +7,7 @@ Repository containing a subforlder for each day of AoC 2022. Tried to realise ea
 - [Day 3](./3/):   **Zig** (New)
 - [Day 4](./4/):   **Rust** (Basic)
 - [Day 5](./5/):   **D** (New)
-- [Day 6](./6/):   ?
+- [Day 6](./6/):   **Lua** (New)
 - [Day 7](./7/):   ?
 - [Day 8](./8/):   ?
 - [Day 9](./9/):   ?
