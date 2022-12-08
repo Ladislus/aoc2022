@@ -1,0 +1,15 @@
+{
+  "name": "aoc_8",
+  "version": "1.0.0",
+  "description": "Advent of Code 2022 - Day 8",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ladislas 'Ladislus' WALCAK",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.11.11",
+    "typescript": "^4.9.4"
+  }
+}
