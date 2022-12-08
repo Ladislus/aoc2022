@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -99,38 +100,14 @@ func (folder *Folder) compute(maxSize uint) uint {
 	return sum
 }
 
-// TODO: Remove
-func (folder *Folder) debug() {
+func (folder *Folder) collectSizes(sizes *[]uint) *[]uint {
+	*sizes = append(*sizes, folder.size())
 
-	foln := "[ "
-	fols := len(folder.Folders) - 1
-	filn := "[ "
-	fils := len(folder.Files) - 1
-
-	for index, curr := range folder.Folders {
-		foln += curr.Name
-		if index < fols {
-			foln += ", "
-		}
-	}
-	foln += " ]"
-
-	for index, curr := range folder.Files {
-		filn += curr.Name
-		if index < fils {
-			filn += ", "
-		}
-	}
-	filn += " ]"
-
-	var pn string
-	if folder.Parent == nil {
-		pn = "nil"
-	} else {
-		pn = folder.Parent.Name
+	for _, currentSubfolder := range folder.Folders {
+		currentSubfolder.collectSizes(sizes)
 	}
 
-	fmt.Printf("Folder [ \"%s\", %v, %v, \"%s\" ]\n", folder.Name, foln, filn, pn)
+	return sizes
 }
 
 func help(programName string) {
@@ -138,7 +115,7 @@ func help(programName string) {
 	os.Exit(1)
 }
 
-func input_v1(filepath string, maxSize uint) {
+func input(filepath string, maxSize uint) {
 
 	data, err := os.ReadFile(filepath)
 	if err != nil {
@@ -156,18 +133,14 @@ func input_v1(filepath string, maxSize uint) {
 	isCurrentlyListing := false
 
 	var lines []string = strings.Split(string(data), "\n")
-	for index, line := range lines {
+	for _, line := range lines {
 
 		if match := commandRegex.FindStringSubmatch(line); match != nil {
 			if len(match) != 2 {
 				panic("Didn't capture encapsulated command")
 			}
 
-			currentFolder.debug()
-			fmt.Printf("Line %d: \"%s\" is a command\n", index, line)
-
 			line = match[1]
-			fmt.Printf("\t Extracted command: \"%s\"\n", line)
 
 			if lsRegex.MatchString(line) {
 				isCurrentlyListing = true
@@ -180,18 +153,14 @@ func input_v1(filepath string, maxSize uint) {
 
 				if match[1] == "/" {
 					currentFolder = root
-					fmt.Printf("\t\tNew current folder: \"%s\"\n", currentFolder.Name)
 				} else if match[1] == ".." {
 					if currentFolder.Parent == nil {
 						panic(fmt.Sprintf("Current folder \"%s\" without parent", currentFolder.Name))
 					} else {
 						currentFolder = currentFolder.Parent
-						fmt.Printf("\t\tNew current folder: \"%s\"\n", currentFolder.Name)
 					}
 				} else {
 					currentFolder = currentFolder.tryAddFolder(match[1])
-
-					fmt.Printf("\t\tNew current folder: \"%s\"\n", currentFolder.Name)
 				}
 
 			} else {
@@ -213,8 +182,6 @@ func input_v1(filepath string, maxSize uint) {
 				panic(fmt.Sprintf("Unable to parse file size \"%s\"", match[1]))
 			}
 
-			fmt.Printf("\t\tFILE(\"%s\", %d)\n", match[2], fileSize)
-
 			currentFolder.tryAddFile(match[2], uint(fileSize))
 
 		} else if match := folderRegex.FindStringSubmatch(line); match != nil {
@@ -227,17 +194,31 @@ func input_v1(filepath string, maxSize uint) {
 				panic("Didn't properly capture directory name")
 			}
 
-			dir_name := match[1]
+			currentFolder.tryAddFolder(match[1])
 
-			fmt.Printf("\t\tFOLDER(\"%s\")\n", dir_name)
-
-			currentFolder.tryAddFolder(dir_name)
 		} else {
 			panic(fmt.Sprintf("Unknown line type \"%s\"", line))
 		}
 	}
 
 	fmt.Printf("Input v1: %d\n", root.compute(maxSize))
+
+	var totalDiskSpace uint = 70_000_000
+	var neededDiskSpace uint = 30_000_000
+	var freeDiskSpace uint = totalDiskSpace - root.size()
+
+	var sizes []uint = make([]uint, 0)
+	root.collectSizes(&sizes)
+	sort.Slice(sizes, func(i, j int) bool { return sizes[i] < sizes[j] })
+
+	for _, currentSize := range sizes {
+		if (freeDiskSpace + currentSize) >= neededDiskSpace {
+			fmt.Printf("Input v2: %d\n", currentSize)
+			return
+		}
+	}
+
+	panic("Didn't find any suitable directory to delete")
 }
 
 func main() {
@@ -245,5 +226,5 @@ func main() {
 		help(os.Args[0])
 	}
 
-	input_v1(os.Args[1], 100_000)
+	input(os.Args[1], 100_000)
 }
