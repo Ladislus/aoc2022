@@ -9,7 +9,7 @@ Repository containing a subforlder for each day of AoC 2022. Tried to realise ea
 - [Day 5](./5/):   **D** (New)
 - [Day 6](./6/):   **Lua** (New)
 - [Day 7](./7/):   **Go** (New)
-- [Day 8](./8/):   ?
+- [Day 8](./8/):   **Javascript/Typescript** (Intermediate)
 - [Day 9](./9/):   ?
 - [Day 10](./10/): ?
 - [Day 11](./11/): ?
