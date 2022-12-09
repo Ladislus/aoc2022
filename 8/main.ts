@@ -8,12 +8,16 @@ class Tree {
 
     visibleLeft: boolean | null;
     maxLeft: number;
+    viewLeft: number;
     visibleTop: boolean | null;
     maxTop: number;
+    viewTop: number;
     visibleRight: boolean | null;
     maxRight: number;
+    viewRight: number;
     visibleBottom: boolean | null;
     maxBottom: number;
+    viewBottom: number;
 
     constructor(height: number) {
         this.height = height;
@@ -26,6 +30,39 @@ class Tree {
         this.maxRight = -1;
         this.visibleBottom = null;
         this.maxBottom = -1;
+    }
+
+    scenicScore(leftTrees: Tree[], topTrees: Tree[], rightTrees: Tree[], bottomTrees: Tree[]): number {
+
+        // Count trees visible on the left
+        let leftScenicScore = 0;
+        for (let index = 0; index < leftTrees.length; ++index) {
+            ++leftScenicScore;
+            if (leftTrees[index].height >= this.height) break;
+        }
+
+        // Count trees visible on the top (array was filled in reverse)
+        let topScenicScore = 0;
+        for (let index = 0; index < topTrees.length; ++index) {
+            ++topScenicScore;
+            if (topTrees[index].height >= this.height) break;
+        }
+
+        // Count trees visible on the right
+        let rightScenicScore = 0;
+        for (let index = 0; index < rightTrees.length; ++index) {
+            ++rightScenicScore;
+            if (rightTrees[index].height >= this.height) break;
+        }
+
+        // Count trees visible on the bottom
+        let bottomScenicScore = 0;
+        for (let index = 0; index < bottomTrees.length; ++index) {
+            ++bottomScenicScore;
+            if (bottomTrees[index].height >= this.height) break;
+        }
+
+        return leftScenicScore * topScenicScore * rightScenicScore * bottomScenicScore;
     }
 }
 
@@ -61,7 +98,7 @@ class Forest {
                     tree.visibleLeft = true;
                     tree.maxLeft = tree.height;
                 } else {
-                    const leftTree: Tree = this.trees[rowIndex][columnIndex - 1];
+                    const leftTree: Tree = row[columnIndex - 1];
                     tree.visibleLeft = (leftTree.maxLeft < tree.height);
                     tree.maxLeft = Math.max(leftTree.maxLeft, tree.height);
                 }
@@ -108,10 +145,10 @@ class Forest {
         // Check if all values where computed
         this.trees.forEach((row: Tree[], rowIndex: number) => {
             row.forEach((tree: Tree, columnIndex: number) => {
-                assert(tree.visibleLeft != null, `Tree [${rowIndex}:${columnIndex}] left`);
-                assert(tree.visibleTop != null, `Tree [${rowIndex}:${columnIndex}] top`);
-                assert(tree.visibleRight != null, `Tree [${rowIndex}:${columnIndex}] right`);
-                assert(tree.visibleBottom != null, `Tree [${rowIndex}:${columnIndex}] bottom`);
+                assert(tree.visibleLeft != null, `Tree [${rowIndex}:${columnIndex}] has null left visibility`);
+                assert(tree.visibleTop != null, `Tree [${rowIndex}:${columnIndex}] has null top visibility`);
+                assert(tree.visibleRight != null, `Tree [${rowIndex}:${columnIndex}] has null right visibility`);
+                assert(tree.visibleBottom != null, `Tree [${rowIndex}:${columnIndex}] has null bottom visibility`);
 
                 if (tree.visibleLeft || tree.visibleTop || tree.visibleRight || tree.visibleBottom) ++count
             })
@@ -126,7 +163,7 @@ function help() {
     exit(1)
 }
 
-async function input(filepath: string) {
+async function input_v1(filepath: string) {
 
     let forest: Forest = null;
 
@@ -146,10 +183,58 @@ async function input(filepath: string) {
         splittedLine.forEach((value: string, _: number) => forest.addTree(new Tree(parseInt(value))));
     }
 
-    forest.compute()
+    forest.compute();
+}
+
+async function input_v2(filepath: string) {
+
+    let forest: Forest = null;
+
+    // How hard can it be to open a simple file, seriously ?
+    const lineReader = createInterface({
+        input: createReadStream(filepath),
+        crlfDelay: Infinity
+    });
+
+    for await (const line of lineReader) {
+
+        const splittedLine = line.split('');
+
+        if (forest == null) forest = new Forest(splittedLine.length);
+        forest.addRow();
+
+        splittedLine.forEach((value: string, _: number) => forest.addTree(new Tree(parseInt(value))));
+    }
+
+    let maxScenicScore: number = -1;
+
+    forest.trees.forEach((row: Tree[], rowIndex: number) => {
+        row.forEach((tree: Tree, columnIndex: number) => {
+            let leftTrees: Tree[] = [];
+            let topTrees: Tree[] = [];
+            let rightTrees: Tree[] = [];
+            let bottomTrees: Tree[] = [];
+
+            if (columnIndex > 0) leftTrees = forest.trees[rowIndex].slice(0, columnIndex).reverse();
+            if (columnIndex < forest.length - 1) rightTrees = forest.trees[rowIndex].slice(columnIndex + 1);
+            if (rowIndex > 0) {
+                for (let currentRownIndex = rowIndex - 1; currentRownIndex >= 0; --currentRownIndex) topTrees.push(forest.trees[currentRownIndex][columnIndex]);
+            }
+            if (rowIndex < forest.height - 1) {
+                for (let currentRowIndex = rowIndex + 1; currentRowIndex <= forest.length - 1; ++currentRowIndex) bottomTrees.push(forest.trees[currentRowIndex][columnIndex]);
+            }
+
+            let currentScenicScore: number = tree.scenicScore(leftTrees, topTrees, rightTrees, bottomTrees);
+
+            maxScenicScore = Math.max(maxScenicScore, currentScenicScore);
+        })
+    });
+
+    console.log(`input_v2: ${maxScenicScore}`);
 }
 
 
 
 if (argv.length != 3) help();
-input(argv[2]);
+input_v1(argv[2]);
+input_v2(argv[2]);
